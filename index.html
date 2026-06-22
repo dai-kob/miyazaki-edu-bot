@@ -3,402 +3,470 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>三松中 危機管理マニュアル ボット</title>
+    <title>宮崎県教育法務コンサルタント</title>
     <style>
         :root {
-            --primary: #1a365d;
-            --danger: #c53030;
-            --bg: #f7fafc;
+            --primary-color: #1a365d; /* 重厚感・信頼感のある紺色 */
+            --accent-color: #2b6cb0;
+            --bg-color: #f7fafc;
             --chat-bg: #ffffff;
-            --text: #2d3748;
+            --user-msg-bg: #ebf8ff;
+            --user-msg-border: #bee3f8;
+            --bot-msg-bg: #f7fafc;
+            --bot-msg-border: #e2e8f0;
+            --text-color: #2d3748;
+            --text-muted: #718096;
         }
+
         body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background: var(--bg);
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
         }
+
         .chat-container {
             width: 100%;
-            max-width: 480px;
-            height: 100vh;
-            max-height: 800px;
+            max-width: 850px;
+            height: 95vh;
             background: var(--chat-bg);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            border: 1px solid #e2e8f0;
         }
+
         .chat-header {
-            background: var(--primary);
+            background-color: var(--primary-color);
             color: white;
-            padding: 15px;
-            font-size: 15px;
-            font-weight: bold;
+            padding: 20px;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chat-header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            letter-spacing: 0.05em;
+        }
+
+        .chat-header .chat-subtitle {
+            font-size: 0.85rem;
+            font-weight: normal;
+            opacity: 0.9;
+            margin-top: 6px;
             line-height: 1.4;
         }
-        .chat-messages {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .message {
-            max-width: 90%;
-            padding: 12px 14px;
-            border-radius: 10px;
-            font-size: 13.5px;
-            line-height: 1.6;
-        }
-        .bot-message {
+
+        .quick-tags {
+            padding: 12px 20px;
             background: #edf2f7;
-            color: var(--text);
-            align-self: flex-start;
-        }
-        .user-message {
-            background: var(--primary);
-            color: white;
-            align-self: flex-end;
-        }
-        .options-container {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-            width: 100%;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e2e8f0;
         }
-        .option-btn {
+
+        .tag-btn {
             background: white;
-            border: 1px solid #cbd5e0;
-            color: #4a5568;
-            padding: 10px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            text-align: left;
-            font-weight: 500;
-        }
-        .option-btn:hover {
-            background: #f7fafc;
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        .danger-btn {
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-        .danger-btn:hover {
-            background: #fff5f5;
-        }
-        .chat-footer {
-            padding: 10px;
-            background: #f7fafc;
-            border-top: 1px solid #e2e8f0;
-            text-align: center;
-        }
-        .reset-btn {
-            background: #718096;
-            color: white;
-            border: none;
-            padding: 8px 20px;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 8px 16px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .section-title {
+
+        .tag-btn:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background-color: #fafbfd;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .message {
+            margin-bottom: 24px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            margin-right: auto;
+        }
+
+        .message.user {
+            margin-left: auto;
+        }
+
+        .bubble {
+            padding: 16px 20px;
+            border-radius: 8px;
+            line-height: 1.7;
+            font-size: 0.95rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .bot .bubble {
+            background-color: var(--bot-msg-bg);
+            border-left: 5px solid var(--primary-color);
+            border-top: 1px solid var(--bot-msg-border);
+            border-right: 1px solid var(--bot-msg-border);
+            border-bottom: 1px solid var(--bot-msg-border);
+        }
+
+        .user .bubble {
+            background-color: var(--user-msg-bg);
+            border: 1px solid var(--user-msg-border);
+            color: #2b6cb0;
+        }
+
+        /* 出力構成スタイル */
+        .section-box {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .section-header {
             font-weight: bold;
-            color: var(--primary);
-            border-left: 4px solid var(--primary);
-            padding-left: 6px;
-            margin: 10px 0 5px 0;
+            color: var(--primary-color);
+            border-left: 3px solid var(--accent-color);
+            padding-left: 8px;
+            margin-bottom: 8px;
+            font-size: 1rem;
         }
-        .alert-box {
-            background: #fff5f5;
-            border: 1px solid #fed7d7;
-            color: #9b2c2c;
-            padding: 8px;
-            border-radius: 4px;
+
+        .section-content {
+            padding-left: 11px;
+            color: var(--text-color);
+        }
+
+        .section-content ul {
             margin: 5px 0;
-            font-size: 12.5px;
+            padding-left: 20px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-            margin-top: 5px;
+
+        .section-content li {
+            margin-bottom: 4px;
         }
-        th, td {
-            border: 1px solid #e2e8f0;
-            padding: 5px;
+
+        .chat-input-area {
+            display: flex;
+            padding: 16px 20px;
+            background: #ffffff;
+            gap: 12px;
         }
-        th { background: #edf2f7; }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-input-area input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+        }
+
+        .chat-input-area button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .chat-input-area button:hover {
+            background-color: var(--accent-color);
+        }
+
+        @media (max-width: 600px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+            .quick-tags {
+                padding: 8px 12px;
+                gap: 6px;
+            }
+            .tag-btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            .bubble {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+            }
+        }
     </style>
 </head>
 <body>
 
 <div class="chat-container">
-    <div class="chat-header">小林市立三松中学校<br>緊急危機管理マニュアル ボット</div>
-    <div class="chat-messages" id="chatMessages"></div>
-    <div class="chat-footer">
-        <button class="reset-btn" onclick="initChat()">目次に戻る</button>
+    <div class="chat-header">
+        <h1>宮崎県教育法務コンサルタント</h1>
+        <div class="chat-subtitle">※法律や宮崎県の条例・規則に基づき、教育現場の各種事例へ客観的なアドバイスを提供します。</div>
+    </div>
+    
+    <div class="quick-tags">
+        <button class="tag-btn" onclick="askQuick('いじめについて')">いじめについて</button>
+        <button class="tag-btn" onclick="askQuick('不登校の対応')">不登校の対応</button>
+        <button class="tag-btn" onclick="askQuick('部活動のガイドライン')">部活動のガイドライン</button>
+        <button class="tag-btn" onclick="askQuick('教員の働き方')">教員の働き方</button>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <div class="message bot">
+            <div class="bubble">
+                宮崎県教育法務コンサルタントへようこそ。宮崎県の教育現場における法令やガイドラインに基づいたアドバイスを提供します。<br><br>
+                「いじめ」「不登校」「部活動」「働き方」などについて、気になるトピックを上のメニューから選ぶか、メッセージを入力してください。
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <input type="text" id="userInput" placeholder="質問を入力してください（例：部活動の活動時間は？）" onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()">送信</button>
     </div>
 </div>
 
 <script>
-    const chatData = {
-        start: {
-            text: "<strong>■ I はじめに</strong><br>本校の危機管理手順です。現場の状況に応じて最適な対応をしてください。<br><br>確認したい項目を選択してください。",
-            options: [
-                { text: "📌 II 基本・III 報道・IV 体制", next: "base_rules" },
-                { text: "📞 V 緊急連絡先（消防・警察・病院）", next: "contacts" },
-                { text: "📂 [1〜5] 生徒・職員の事故", next: "cat_1" },
-                { text: "📂 [6〜10] 不審者・学校火災", next: "cat_2" },
-                { text: "📂 [11〜16] 地震・風水害・噴火", next: "cat_3" },
-                { text: "📂 [17〜19] 食中毒・異物混入・噴火", next: "cat_4" },
-                { text: "📂 [20〜22] 校内暴力事件", next: "cat_5" },
-                { text: "📂 [23〜24] いじめ問題", next: "cat_6" },
-                { text: "📂 [25〜27] 万引き・原因不明死亡", next: "cat_7" }
-            ]
+    // 厳密な構成ルールに基づく教育法務データベース
+    const database = {
+        "いじめ": {
+            reply: `
+                <div class="section-box">
+                    <div class="section-header">1. 【結論・一般的な対応】</div>
+                    <div class="section-content">
+                        いじめの疑いが生じた、または相談を受けた場合、特定の教員だけで抱え込まず、直ちに校長をリーダーとする「学校いじめ対策組織」を招集し、組織として事実確認や被害児童生徒の保護を最優先で開始する必要があります。決して「いじめの隠蔽」や「単なる悪ふざけ」として処理してはなりません。
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-header">2. 【根拠となる法令・条例・ガイドライン】</div>
+                    <div class="section-content">
+                        <ul>
+                            <li><strong>いじめ防止対策推進法第22条：</strong>すべての学校にいじめの防止等の対策を行うための「組織（学校いじめ対策組織）」の常設を義務付けています。</li>
+                            <li><strong>いじめ防止対策推進法第23条：</strong>いじめの通報や相談を受けた教職員に対し、直ちに当該組織への報告と事実確認・支援体制の始動を命じています。</li>
+                            <li><strong>宮崎県いじめ防止基本方針：</strong>県独自のルールとして、早期発見のための質問紙調査の定期的な実施方法、重大事態の判断、および県教育委員会への速やかな経過報告手順などが詳細に規定されています。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-header">3. 【今後の留意点・相談窓口】</div>
+                    <div class="section-content">
+                        初期対応においては、被害者と加害者を引き合わせた一方的な指導を避け、別室でそれぞれの話を丁寧に聞くことが鉄則です。状況の深刻度に応じて以下の窓口とも速やかに連携してください。
+                        <ul>
+                            <li><strong>宮崎県教育委員会 義務教育課</strong>（公立義務教育学校等への指導等）</li>
+                            <li><strong>宮崎県子ども・保護者専用相談ダイヤル（24時間子供SOSダイヤル）：</strong>0120-0-78310</li>
+                            <li><strong>法テラス宮崎：</strong>法的な解決窓口（いじめによる損害賠償・人権擁護など）</li>
+                        </ul>
+                    </div>
+                </div>
+            `
         },
-        base_rules: {
-            text: "<div class='section-title'>II 基本事項</div>・<strong>生命尊重が第一義</strong><br>・誠意と責任、保護者判断を優先<br>・事実のみ記録、推測や隠蔽は厳禁<br><div class='section-title'>III 報道対応</div>・窓口は<strong>学校長（教頭）に一本化</strong><br>・当事者氏名は非公表（プライバシー保護）<br>・不明な点は「調査中」とし、憶測は避ける<br><div class='section-title'>IV 発生時の体制</div>・【だれが】【いつ】【どこで】【どんな状況】【今は】を迅速報告<br>・校長・教頭の指揮下で各主任・担任が連携、市教委・警察等へ連絡",
-            options: [{ text: "↩️ 目次に戻る", next: "start" }]
+        "不登校": {
+            reply: `
+                <div class="section-box">
+                    <div class="section-header">1. 【結論・一般的な対応】</div>
+                    <div class="section-content">
+                        不登校は単なる生徒の「問題行動」ではなく、心身の休息や適切な支援を要する状態として扱われます。登校することそのものを無理やり目的とするのではなく、生徒一人ひとりの社会的自立を目指し、ICT等の自宅学習、別室登校、適応指導教室など、状況に応じた「多様な学びの場」を確保、提供することが優先されます。
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-header">2. 【根拠となる法令・条例・ガイドライン】</div>
+                    <div class="section-content">
+                        <ul>
+                            <li><strong>教育機会確保法（義務教育の段階における普通教育に相当する教育の機会の確保等に関する法律）：</strong>不登校児童生徒への適切な休養の必要性を認め、学校以外の学習活動の重要性を国・自治体・学校の基本指針として示しています。</li>
+                            <li><strong>文部科学省通知「不登校児童生徒への支援の在り方について」：</strong>自宅でのICT等を用いた学習について、一定の要件（校長が認めること等）を満たせば「出席扱い」とすることが認められています。</li>
+                            <li><strong>宮崎県教育施策方針：</strong>学校への復帰のみを目指すのではなく、スクールカウンセラー（SC）やスクールソーシャルワーカー（SSW）等、専門スタッフの派遣拡充および関係機関（宮崎県の「ステップルーム（別室）」など）の活用を強く求めています。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-header">3. 【今後の留意点・相談窓口】</div>
+                    <div class="section-content">
+                        保護者と十分に信頼関係を築き、無理な家庭訪問や過剰な登校要求は逆効果となる場合があることを念頭に置いてください。また、市町村教育委員会と協議のうえ、「出席扱い」や外部教育施設の有効性を検討しましょう。
+                        <ul>
+                            <li><strong>宮崎県教育研修センター（教育相談課）：</strong>教職員・保護者からの教育相談や専門カウンセリング</li>
+                            <li><strong>各市町村教育委員会（適応指導教室等）：</strong>学校復帰に向けた支援、多様な学習の場の提供に関する相談</li>
+                        </ul>
+                    </div>
+                </div>
+            `
         },
-        contacts: {
-            text: "<div class='section-title'>V 緊急連絡先</div><table><tr><th>機関名</th><th>番号</th></tr><tr><td>救急車 / 消防（代表）</td><td>119 / 23-2013</td></tr><tr><td>中央消防署指令課</td><td>23-0199</td></tr><tr><td>小林警察署（緊急/代表）</td><td>110 / 23-0110</td></tr><tr><td>小林市教育委員会</td><td>23-0424</td></tr><tr><td>南部教育事務所</td><td>0986-23-4521</td></tr><tr><td>小林市立病院</td><td>23-4711</td></tr><tr><td>園田病院 / 前原病院</td><td>22-2221 / 23-1711</td></tr><tr><td>桑原記念 / 押領司病院</td><td>22-4138 / 22-3131</td></tr></table>",
-            options: [{ text: "↩️ 目次に戻る", next: "start" }]
+        "部活動": {
+            reply: `
+                <div class="section-box">
+                    <div class="section-header">1. 【結論・一般的な対応】</div>
+                    <div class="section-content">
+                        学校長及び部活動顧問は、生徒の健康管理と教員への過剰な負担軽減の両立を図るため、定められた活動時間および休養日の基準を厳守しなければなりません。
+                        具体的には、<strong>平日は1日2時間程度、休日は3時間程度</strong>を上限とし、<strong>週に2日以上（平日1日、土日1日以上）</strong>を休養日とする運用を行います。
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-header">2. 【根拠となる法令・条例・ガイドライン】</div>
+                    <div class="section-content">
+                        <ul>
+                            <li><strong>学校教育法施行規則：</strong>学校長は学校教育の一環としての教育活動を管理統括する責任があります。</li>
+                            <li><strong>宮崎県における部活動の在り方に関する方針（宮崎県部活動ガイドライン）：</strong>宮崎県教委がスポーツ庁・文化庁の国針に準拠して策定した公式の指針です。この中で活動時間の上限や休養日の設定が具体的に義務化されており、大会の精選、地域クラブ活動への移行推進などが求められています。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-header">3. 【今後の留意点・相談窓口】</div>
+                    <div class="section-content">
+                        大会やコンクール直前の例外措置（休養日の調整など）を取る場合でも、学校長の適切な許可と事後の代替休養取得を徹底してください。地域移行の計画に関しては市町村ごとの計画に合わせて推し進める必要があります。
+                        <ul>
+                            <li><strong>宮崎県教育委員会 スポーツ振興課：</strong>運動部活動・地域スポーツ移行に関する窓口</li>
+                            <li><strong>宮崎県教育委員会 文化課：</strong>文化部活動・地域文化活動に関する窓口</li>
+                        </ul>
+                    </div>
+                </div>
+            `
         },
-        cat_1: {
-            text: "📂 <strong>[1〜5] 生徒・職員の事故</strong>",
-            options: [
-                { text: "1 学校内における生徒・職員の事故", next: "m1" },
-                { text: "2 学校外における生徒の事故", next: "m2" },
-                { text: "3 学校内外事故のチェック事項", next: "m3" },
-                { text: "4 学校外における職員の事故", next: "m4" },
-                { text: "5 職員事故のチェック表", next: "m5" },
-                { text: "↩️ 目次に戻る", next: "start" }
-            ]
-        },
-        cat_2: {
-            text: "📂 <strong>[6〜10] 不審者・学校火災</strong>",
-            options: [
-                { text: "6 学校内の部外者侵入（不審者）", next: "m6" },
-                { text: "7 不審者侵入のチェック事項", next: "m7" },
-                { text: "8 職員在勤中の学校火災", next: "m8" },
-                { text: "9 職員不在中の学校火災", next: "m9" },
-                { text: "10 学校火災のチェック事項", next: "m10" },
-                { text: "↩️ 目次に戻る", next: "start" }
-            ]
-        },
-        cat_3: {
-            text: "📂 <strong>[11〜16] 地震・風水害・噴火</strong>",
-            options: [
-                { text: "11 職員在勤中の地震災害", next: "m11" },
-                { text: "12 職員不在中の地震被災", next: "m12" },
-                { text: "13 地震被災のチェック事項", next: "m13" },
-                { text: "14 在勤中の風水害（予想時）", next: "m14" },
-                { text: "15 不在時の風水害（予想時）", next: "m15" },
-                { text: "16 風水害避難のチェック事項", next: "m16" },
-                { text: "↩️ 目次に戻る", next: "start" }
-            ]
-        },
-        cat_4: {
-            text: "📂 <strong>[17〜19] 食中毒・異物混入・噴火</strong>",
-            options: [
-                { text: "17 食中毒・異物混入", next: "m17" },
-                { text: "18 食中毒・異物混入チェック事項", next: "m18" },
-                { text: "19 噴火時のチェック事項", next: "m19" },
-                { text: "↩️ 目次に戻る", next: "start" }
-            ]
-        },
-        cat_5: {
-            text: "📂 <strong>[20〜22] 校内暴力事件</strong>",
-            options: [
-                { text: "20 生徒相互の暴力事件", next: "m20" },
-                { text: "21 対教師暴力事件", next: "m21" },
-                { text: "22 校内暴力のチェック事項", next: "m22" },
-                { text: "↩️ 目次に戻る", next: "start" }
-            ]
-        },
-        cat_6: {
-            text: "📂 <strong>[23〜24] いじめ問題</strong>",
-            options: [
-                { text: "23 いじめ（サイン・組織対応）", next: "m23" },
-                { text: "24 いじめのチェック事項", next: "m24" },
-                { text: "↩️ 目次に戻る", next: "start" }
-            ]
-        },
-        cat_7: {
-            text: "📂 <strong>[25〜27] 万引き・原因不明死亡</strong>",
-            options: [
-                { text: "25 万引き・窃盗事件（流れ・チェック）", next: "m25" },
-                { text: "26 原因不明死亡事件", next: "m26" },
-                { text: "27 死亡事件チェック（自殺判明時含む）", next: "m27" },
-                { text: "↩️ 目次に戻る", next: "start" }
-            ]
-        },
-        m1: {
-            text: "<strong>■ 1 校内での生徒・職員事故</strong><br>① <strong>救命措置</strong>：側近者が最優先で対応、応援要請<br>② <strong>応急処置</strong>：養護教諭が対応<br>③ <strong>救急車要請</strong>：保健主事（学年/性別/氏名/状態/進入場所を伝える）<br>④ <strong>保護者連絡</strong>：学級担任（冷静に状況・搬送先を伝える）※加害者側へも直後連絡<br>⑤ <strog>搬送・調査</strong>：原則救急車/タクシー。教頭が状況調査。重大なら管理職も病院へ<br>⑥ <strong>諸機関連絡</strong>：校長判断で市教委・教育事務所へ報告",
-            options: [{ text: "↩️ グループへ", next: "cat_1" }]
-        },
-        m2: {
-            text: "<strong>■ 2 校外での生徒事故</strong><br>① <strong>受報</strong>：氏名・場所・状況・搬送先・加害者情報をメモ<br>②  <strong>校内連携</strong>：管理職、担任、生指、学年主任へ即連絡<br>③ <strong>保護者・警察連絡</strong>：担任から保護者へ連絡、校長から警察へ連絡<br>④ <strong>現状確認</strong>：担任は病院へ（身体最優先）、生指は現場確認と状況聴取<br>⑤ <strong>報告</strong>：市教委・教育事務所へは校長判断で連絡",
-            options: [{ text: "↩️ グループへ", next: "cat_1" }]
-        },
-        m3: {
-            text: "<strong>■ 3 学校内外事故チェック事項</strong><br>【記録・確認】<br>□ 事故者・加害者（年級/氏名/保護者名/担任/連絡状況）<br>□ 日時・場所（月日・曜日・時間・発生場所）<br>□ 事故内容（症状/原因/応急処置/搬送先/容態/警察処理の有無）",
-            options: [{ text: "↩️ グループへ", next: "cat_1" }]
-        },
-        m4: {
-            text: "<strong>■ 4 学校外での職員事故</strong><br><strong>【本人が連絡可能な場合】</strong><br>・校長(教頭)が受報。誠意をもった処理を指導。重大なら管理職が現場・病院へ<br><strong>【本人が連絡不可（負傷）の場合】</strong><br>・校長(教頭)が受報、現場状況・病院確認。教頭が状況整理し校長へ報告<br>※いずれも校長判断で市教委等へ連絡",
-            options: [{ text: "↩️ グループへ", next: "cat_1" }]
-        },
-        m5: {
-            text: "<strong>■ 5 職員事故チェック表</strong><br>【記録・確認】<br>□ 事故者・相手方（職名/氏名/年齢/住所/電話）<br>□ 日時・場所・原因（月日・曜日・時間・場所・状況）<br>□ 症状・搬送（双方の症状/病院名/搬送手段/到着時間/容態/警察処理の有無）",
-            options: [{ text: "↩️ グループへ", next: "cat_1" }]
-        },
-        m6: {
-            text: "<strong>■ 6 学校内不審者侵入</strong><br><strong>【発見時】</strong>：用件確認、複数男性職員で退去させる。管理職へ報告<br><strong>【事件発生時（生徒最優先）】</strong><br>① <strong>現場</strong>：大声を出させる、机や消火器で防御、避難経路確保<br>② <strong>周知</strong>：大声・火災報知器・校内放送等で全校へ危険周知<br>③ <strong>通報</strong>：教頭が警察(110番)・救急(119番)へ要請<br>④ <strong>制圧</strong>：男性職員は複数で現場急行、動き把握・取り押さえ<br>⑤ <strong>誘導</strong>：女性職員・担任は生徒を職員玄関前へ誘導、点呼し報告<br>⑥ <strong>対応</strong>：保護者連絡、集団下校または迎え要請。市教委報告",
-            options: [{ text: "↩️ グループへ", next: "cat_2" }]
-        },
-        m7: {
-            text: "<strong>■ 7 不審者侵入チェック事項</strong><br>【記録・確認】<br>□ 不審者情報（氏名/住所/性別/年齢/行動や様子）<br>□ 日時・場所（月日・曜日・時間・場所）<br>□ 被害状況（生徒毎の年組/氏名/保護者連絡/被害/処置/搬送先/容態）",
-            options: [{ text: "↩️ グループへ", next: "cat_2" }]
-        },
-        m8: {
-            text: "<strong>■ 8 職員在勤中の学校火災</strong><br>① <strong>発見</strong>：初期消火、警報器作動。2人体制（消火と連絡）。生徒退去<br>② <strong>通報</strong>：事務・教頭が消防(119番)・セコムへ通報<br>③ <strong>放送</strong>：教頭・教務が実施<br>  ・<small>確認中：『警報器が作動しています。確認中ですのでそのまま待機してください』</small><br>  ・<small>確定後：『只今○棟○階の○室より火災が発生しました。運動場へ避難しなさい』</small><br>④  <strong>誘導・点呼</strong>：担任が人員点呼し学年主任経由で教頭へ報告。誘導係は校舎内を確認<br>⑤  <strong>持出</strong>：作業班長の指示で非常持ち出し<br>⑥  <strong>事後</strong>：諸機関連絡、現場接近禁止、下校・明日登校指導",
-            options: [{ text: "↩️ グループへ", next: "cat_2" }]
-        },
-        m9: {
-            text: "<strong>■ 9 職員不在中の学校火災</strong><br>① <strong>受報</strong>：必ず校長・教頭へ連絡を届ける<br>② <strong>出勤</strong>：連絡網により全職員非常出勤<br>③ <strong>持出</strong>：消防監督者の指導のもと、校長判断・班長指示で実施<br>④ <strong>処理</strong>：対策委・職員会で協議（戸締り・火気・薬品等の使用状況確認）<br>⑤ <strong>指導</strong>：生徒へ授業可否連絡、事情聴取は管理職が対応、市教委報告",
-            options: [{ text: "↩️ グループへ", next: "cat_2" }]
-        },
-        m10: {
-            text: "<strong>■ 10 学校火災チェック事項</strong><br>【記録・確認】<br>□ 基本情報（日時/場所/原因/明日からの授業体制/生徒連絡方法）<br>□ 負傷者（年級氏名/症状/原因/処置/搬送先・容態）<br>□ 不在出火時（前日の戸締り/ガス/ストーブ/電気/薬品の使用状況確認）",
-            options: [{ text: "↩️ グループへ", next: "cat_2" }]
-        },
-        m11: {
-            text: "<strong>■ 11 職員在勤中の地震災害</strong><br>① <strong>発生</strong>：窓から離れ机の下へ身の安全確保指示。教師は出口確保<br>② <strong>放送</strong>：教頭・教務（揺れ収穫後）<br>  <small>『余震の恐れがあります。頭を覆い、落下物を避け、速やかに校舎前広場へ避難しなさい』</small><br>③ <strong>誘導・点呼</strong>：整然と避難、担任点呼し学年主任経由で教頭へ報告<br>④ <strong>持出・判断</strong>：火災時は班長指示で持出。校長が敷地・通学路の安全確認・復帰判断<br>⑤ <strong>事後</strong>：下校・明日登校指導。市教委へ報告",
-            options: [{ text: "↩️ グループへ", next: "cat_3" }]
-        },
-        m12: {
-            text: "<strong>■ 12 職員不在中の地震被災</strong><br>① <strong>確認</strong>：校長・教頭が出動、学校および通学区域の被災状況把握<br>② <strong>連絡</strong>：職員被災状況・出勤要請、各地区対策本部(市役所)と情報連携<br>③ <strong>報告</strong>：市教委・教育事務所へ被災状況・対応策を連絡<br>④ <strong>会議</strong>：出勤職員で緊急会議（情報収集、避難所時の管理体制、当面措置検討）<br>⑤ <strong>指導</strong>：学級連絡網で生徒へ授業可否・安全指導連絡",
-            options: [{ text: "↩️ グループへ", next: "cat_3" }]
-        },
-        m13: {
-            text: "<strong>■ 13 地震被災チェック事項</strong><br>【記録・確認】<br>□ 基本情報（日時/場所/規模/負傷者情報・搬送先・容態）<br>□ 被害点検（火災/ガラス/外壁モルタル/柱/建物の傾き/ブロック塀倒壊/敷地床のひび/落下物散乱/施設設備/出入口窓の開閉/断線）<br>□ 今後の対応（授業体制/復旧作業/生徒職員被災把握/連絡方法/避難所管理体制）",
-            options: [{ text: "↩️ グループへ", next: "cat_3" }]
-        },
-        m14: {
-            text: "<strong>■ 14 在勤中の風水害（予想時）</strong><br>① <strong>情報収集</strong>：校長・教頭が気象情報収集、各地域本部から通学路安全情報収集<br>② <strong>臨時職員会議</strong>：情報共有、生徒下校の時期・方法・指導事項を決定<br>③ <strong>生徒下校</strong>：決定事項を十分指導した上で生徒を下校させる<br>④ <strong>報告</strong>：市教委・教育事務所へ学校の措置・地域被災状況を報告",
-            options: [{ text: "↩️ グループへ", next: "cat_3" }]
-        },
-        m15: {
-            text: "<strong>■ 15 不在時の風水害（予想時）</strong><br>管理職・教務で協議し、連絡網で以下を指示。<br><strong>【生徒への指示（学級連絡網）】</strong><br>・臨時休校 / 始業を遅らせて登校（○時登校） / 自宅待機<br><strong>【職員への指示（職員連絡網）】</strong><br>・安全第一で出動 / 次の連絡まで自宅待機 / 指定時刻出動（○時出動）",
-            options: [{ text: "↩️ グループへ", next: "cat_3" }]
-        },
-        m16: {
-            text: "<strong>■ 16 風水害避難チェック事項</strong><br>【記録・確認】<br>□ 基本情報（日時/天候状況と今後の予測）<br>□ 危険内容（地域状況、特に増水・がけ崩れの危険箇所）<br>□ 指示内容（生徒への処置指示/職員への指示内容）",
-            options: [{ text: "↩️ グループへ", next: "cat_3" }]
-        },
-        m17: {
-            text: "<strong>■ 17 食中毒発生・異物混入</strong><br>① <strong>報告</strong>：発見者は直ちに管理職・給食主任・養護教諭・技士へ報告<br>② <strong>停止・保存</strong>：教頭が給食一時停止を通報。保存食・異物・嘔吐物を保存<br>③ <strong>機関連絡</strong>：校長が市教委給食課、中央保健所、学校医、教育事務所へ連絡<br>④ <strong>対応</strong>：担任・学年主任から関係生徒指導、保護者連絡<br>⑤ <strong>事後</strong>：市教委へ文書報告、家庭へ文書配付、給食実施計画の改善点検",
-            options: [{ text: "↩️ グループへ", next: "cat_4" }]
-        },
-        m18: {
-            text: "<strong>■ 18 食中毒・異物混入チェック事項</strong><br>【記録・確認】<br>□ 基本情報（日時/場所/原因/患者毎の症状・処置・搬送先・容態）<br>□ 事実確認（業者確認/保存食/献立/物資納入業者/異物/嘔吐物等）<br>□ 今後の対応（授業体制/生徒指導事項/保護者対応）",
-            options: [{ text: "↩️ グループへ", next: "cat_4" }]
-        },
-        m19: {
-            text: "<strong>■ 19 噴火時チェック事項</strong><br>【対応】情報収集 ➔ 臨時職員会議 ➔ 生徒下校（保護者引渡し含む） ➔ 市教委報告<br>【被害点検・記録項目】<br>□ 日時・状況、火災/ガラス/外壁/柱/傾き/ひび/落下物/施設設備/出入口/断線<br>□ 明日からの授業体制、災害復旧、生徒職員被災把握、避難所管理体制、負傷者情報",
-            options: [{ text: "↩️ グループへ", next: "cat_4" }]
-        },
-        m20: {
-            text: "<strong>■ 20 生徒相互の暴力事件</strong><br>※負傷あり時は「校内生徒事故(1)」と並行対応<br>① <strong>聴取・指導</strong>：双方から言い分聴取。事実関係把握。暴力不可の徹底指導<br>② <strong>保護者連絡</strong>：担任から双方の保護者へ事件全容・措置を連絡、協力要請<br>③ <strong>校内連携</strong>：担任から生指・教頭・校長へ報告。全職員で指導協力<br>④ <strong>諸機関連絡</strong>：校長判断で実施",
-            options: [{ text: "↩️ グループへ", next: "cat_5" }]
-        },
-        m21: {
-            text: "<strong>■ 21 対教師暴力事件</strong><br>①  <strong>制止</strong>：見かけた職員は直ちに止めに入り、他教師を呼ぶ<br>②  <strong>報告</strong>：些細なことでも必ず生指主事を経て教頭・校長へ即報告<br>③  <strong>聴取</strong>：生指主事が生徒から、校長が当事者職員から事情聴取（怪我時は即病院）<br>④  <strong>職員会議</strong>：臨時会議で全容確認、全職員の指導共通理解を図る<br>⑤  <strong>保護者連絡</strong>：教頭から経緯・全容を連絡、学校の指導への協力を要請",
-            options: [{ text: "↩️ グループへ", next: "cat_5" }]
-        },
-        m22: {
-            text: "<strong>■ 22 校内暴力チェック事項</strong><br>【記録・確認】<br>□ 基本情報（日時/被害者・加害者の年組氏名保護者名）<br>□ 暴力内容（傷害名/全治期間）、原因となった状況（双方の言い分）<br>□ 背景・留意点（事件に至った背景/指導留意点/家庭との連携）",
-            options: [{ text: "↩️ グループへ", next: "cat_5" }]
-        },
-        m23: {
-            text: "<strong>■ 23 いじめ問題</strong><br>① <strong>報告</strong>：発見職員は直ちに生指主事・教頭・校長へ報告<br>② <strong>調査</strong>：担任が双方の言い分・交友実態を聴取。被害者心情への最大配慮<br>③ <strong>協議</strong>：いじめ登校拒否対策委員会で分析・全職員の指導体制・父母連携協議<br>④ <strong>対応</strong>：委員会・管理職から県教委（重大事態）、警察（罪行為時）、関係機関連携<br><br><strong>🔍 発見サイン一覧</strong><br>・<strong>いじられた側</strong>：遅刻欠席増/視線合わず/体調不良/保健室登校/忘れ物/表情暗い/下校急ぐ/持ち物紛失落書き<br>・<strong>いじた側</strong>：ひそひそ話/周囲が異常に気を遣う/教師接近で分散/自己中心行動<br>・<strong>教室/家庭</strong>：嫌なあだ名/席替え拒否/落書き/学校友人の話をしない/メールをコソコソ見る/部屋に閉じこもる/金銭欲しがる",
-            options: [{ text: "↩️ グループへ", next: "cat_6" }]
-        },
-        m24: {
-            text: "<strong>■ 24 いじめチェック事項</strong><br>【記録・確認】<br>□ 基本情報（日時/発覚状況/連絡者/被害者・加害者年組氏名保護者名）<br>□ 実態（双方の言い分/実態の分析と考察/指導の留意点/家庭連携）",
-            options: [{ text: "↩️ グループへ", next: "cat_6" }]
-        },
-        m25: {
-            text: "<strong>■ 25 万引き・窃盗事件</strong><br><strong>【処理の流れ】</strong>通報受報（店名/警察署/品物/状況確認）➔ 校内連携（担任・生指・管理職） ➔ 引き取り（担任・生指が店/警察へ） ➔ 事情聴取指導（行動をたどり全容解明） ➔ 家庭連絡（店への謝罪確認・促し）<br><strong>【チェック表 記録必須項目】</strong><br>□ 日時・場所、生徒・保護者情報（年組/氏名/住所/電話）<br>□ 事件内容（動機/当日の行動/被害状況/類似行動）、今後の指導・家庭連携",
-            options: [{ text: "↩️ グループへ", next: "cat_7" }]
-        },
-        m26: {
-            text: "<strong>■ 26 原因不明死亡事件</strong><br>① <strong>受報</strong>：名簿確認、一刻も早く校長(教頭)へ、校長から担任へ連絡<br>② <strong>弔問</strong>：校長・教頭・担任で弔問に訪れる<br>③ <strong>職員会議</strong>：臨時会議開催、死亡生徒の最近の様子など情報共有<br>④ <strong>機関連絡・警察対応</strong>：校長が報告、指導を仰ぐ。聴取には事実のみ伝える<br>⑤  <strong>記者会見</strong>：限定回答。予想や憶測は絶対厳禁。方針に従う<br>⑥  <strong>生徒保護者対応</strong>：職員会議の決定に基づき速やかに対応",
-            options: [{ text: "↩️ グループへ", next: "cat_7" }]
-        },
-        m27: {
-            text: "<strong>■ 27 原因不明死亡事件チェック事項</strong><br>【記録・確認】<br>□ 生徒情報（氏名/生年月日/住所/保護者名/死亡日時・場所・状況・出所）<br>□ 最近の様子（交友/学習/休み時間/言動/健康/悩み）、関係者・報道対応<br><div class='alert-box'><strong>🚨 警察の調べで【自殺】と判明した場合</strong><br>・校長、教頭、担任は再度弔問（誠意をもった対応）<br>・最近の様子を伝え原因を一緒に考える。家庭での変化を傾聴<br>・責任転嫁や早急な理由付けは厳禁。心情を察し汲み取る</div><strong>💬 記者会見想定問答</strong><br>・問『いじめは？』 ➔ 答『現在全般にわたって調査中であり、今の段階でないと言い切ることはできませんが、早急に調べて対応したい』<br>・問『あったかも？』 ➔ 答『重大な事件であり、予想や憶測での発言は控えます。早急に調査します』",
-            options: [{ text: "↩️ グループへ", next: "cat_7" }]
+        "働き方": {
+            reply: `
+                <div class="section-box">
+                    <div class="section-header">1. 【結論・一般的な対応】</div>
+                    <div class="section-content">
+                        教職員の健康を守るため、時間外在校等時間を「月45時間以内」「年360時間以内」と定めた国の指針を原則遵守し、校長は勤務時間の客観的な把握と具体的な業務削減（行事のスリム化、留守電導入など）を率先して実行しなければなりません。
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-header">2. 【根拠となる法令・条例・ガイドライン】</div>
+                    <div class="section-content">
+                        <ul>
+                            <li><strong>給特法（公立の義務教育諸学校等の教職員の給与等に関する特別措置法）第14条・指針：</strong>教職員の時間外在校等時間の上限を月45時間、年360時間とする法的指針が定められています。</li>
+                            <li><strong>地方公務員法第42条（安全衛生義務）：</strong>任命権者（県教委）及び学校長は、教職員の心身の健康を確保するための必要な安全配慮を行う義務があります。</li>
+                            <li><strong>宮崎県教職員の働き方改革推進プラン：</strong>宮崎県教委が定めたロードマップであり、ICカード・パソコン打刻による出退勤時間の厳格な把握、定時退校日の設置、校務DX化の促進、夏季等の学校閉庁日設置などが義務付けられています。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="section-box">
+                    <div class="section-header">3. 【今後の留意点・相談窓口】</div>
+                    <div class="section-content">
+                        教員本人からの業務見直しの申し出や、上限を超えそうな場合の校長面談など、校内での定期的な風通しの確保が重要です。適切な措置が取られない場合は、以下の窓口が利用できます。
+                        <ul>
+                            <li><strong>宮崎県教育委員会 教育人事課：</strong>公立学校教職員の人事・労務管理体制の相談</li>
+                            <li><strong>宮崎県人事委員会：</strong>地方公務員法に基づく「措置要求（勤務条件の改善請求）」などの法的申し立て窓口</li>
+                        </ul>
+                    </div>
+                </div>
+            `
         }
     };
 
-    const chatMessages = document.getElementById('chatMessages');
+    function sendMessage() {
+        const inputEl = document.getElementById('userInput');
+        const text = inputEl.value.trim();
+        if (!text) return;
 
-    function initChat() {
-        chatMessages.innerHTML = '';
-        addBotMessage('start');
-    }
+        // ユーザー側の発言を画面に表示
+        appendMessage(text, 'user');
+        inputEl.value = '';
 
-    function addBotMessage(key) {
-        const data = chatData[key];
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'message bot-message';
-        msgDiv.innerHTML = data.text;
-        chatMessages.appendChild(msgDiv);
-
-        if (data.options && data.options.length > 0) {
-            const optionsDiv = document.createElement('div');
-            optionsDiv.className = 'options-container';
-            
-            data.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                if(opt.text.includes("↩️")) btn.className += " danger-btn";
-                btn.innerHTML = opt.text;
-                btn.onclick = () => handleUserSelection(opt.text, opt.next);
-                optionsDiv.appendChild(btn);
-            });
-            chatMessages.appendChild(optionsDiv);
-        }
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    function handleUserSelection(text, nextKey) {
-        const oldOptions = chatMessages.querySelectorAll('.options-container');
-        oldOptions.forEach(el => el.remove());
-
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'message user-message';
-        msgDiv.innerText = text.replace(/<[^>]*>/g, '');
-        chatMessages.appendChild(msgDiv);
-
+        // コンサルタントボットの応答処理
         setTimeout(() => {
-            addBotMessage(nextKey);
-        }, 150);
+            let matchedKey = null;
+
+            // 部分一致キーワード検索
+            if (text.includes("いじめ") || text.includes("イジメ")) {
+                matchedKey = "いじめ";
+            } else if (text.includes("不登校") || text.includes("学校に行けない") || text.includes("登校しぶき")) {
+                matchedKey = "不登校";
+            } else if (text.includes("部活") || text.includes("ガイドライン") || text.includes("活動時間") || text.includes("休養日")) {
+                matchedKey = "部活動";
+            } else if (text.includes("働き方") || text.includes("残業") || text.includes("給特法") || text.includes("労務") || text.includes("超過")) {
+                matchedKey = "働き方";
+            }
+
+            let replyText = "";
+            if (matchedKey) {
+                replyText = database[matchedKey].reply;
+            } else {
+                replyText = `
+                    <div class="section-box">
+                        <div class="section-header">【申し訳ありません】</div>
+                        <div class="section-content">
+                            ご質問のキーワードに関する詳細な法務マニュアルが特定できませんでした。<br>
+                            「いじめ」「不登校」「部活動」「働き方」などの単語を含めてご相談いただくか、上のクイックメニューからテーマを選んでみてください。
+                        </div>
+                    </div>
+                `;
+            }
+
+            appendMessage(replyText, 'bot');
+        }, 450);
     }
 
-    initChat();
+    function appendMessage(text, sender) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'bubble';
+        bubbleDiv.innerHTML = text;
+        
+        messageDiv.appendChild(bubbleDiv);
+        chatMessages.appendChild(messageDiv);
+        
+        // メッセージ追加時にスムーズに最新部へスクロール
+        chatMessages.scrollTo({
+            top: chatMessages.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+
+    // クイックボタンプッシュ時
+    function askQuick(buttonLabel) {
+        let keyword = "";
+        if (buttonLabel.includes("いじめ")) keyword = "いじめ";
+        if (buttonLabel.includes("不登校")) keyword = "不登校";
+        if (buttonLabel.includes("部活動")) keyword = "部活動";
+        if (buttonLabel.includes("働き方")) keyword = "働き方";
+
+        appendMessage(`${buttonLabel}について教えてください。`, 'user');
+        setTimeout(() => {
+            appendMessage(database[keyword].reply, 'bot');
+        }, 350);
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
 </script>
 
 </body>
